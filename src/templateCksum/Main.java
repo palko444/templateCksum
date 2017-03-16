@@ -16,21 +16,23 @@ public class Main {
 
 		String pg;
 		Namespace ns = ArgParser.parse(args);
+		DataFromFile df = FileOperations.readFile(ns.getString("file"));
 
 		if (ns.getString("subcommand").equals("verify")) {
-			pg = FileOperations.readFile(ns.getString("file")).get(0);
+			pg = df.pg;
 		} else {
 			pg = ns.getString("policyGroup");
 		}
 
-		HashMap<String, String> hm = common(pg);
+		HashMap<String, String> fromDb = createCksumFromDb(pg);
 		boolean ret = false;
+
 		switch (ns.getString("subcommand")) {
 		case "generate":
-			ret = generate(ns.getString("file"), pg, hm);
+			ret = generate(ns.getString("file"), pg, fromDb);
 			break;
 		case "verify":
-			ret = verify(ns.getString("file"), hm);
+			ret = verify(df.polCksum, fromDb);
 			break;
 		default:
 		}
@@ -50,7 +52,7 @@ public class Main {
 		return true;
 	}
 
-	public static HashMap<String, String> common(String pg) throws IOException, NoSuchAlgorithmException {
+	public static HashMap<String, String> createCksumFromDb(String pg) throws IOException, NoSuchAlgorithmException {
 		HashMap<String, String> fromDb = new HashMap<>();
 		Template.createTempFolder();
 		System.out.println(Template.tempFolder);
@@ -60,11 +62,10 @@ public class Main {
 		return fromDb;
 	}
 
-	public static boolean verify(String file, HashMap<String, String> fromDb)
+	public static boolean verify(HashMap<String, String> fromFile, HashMap<String, String> fromDb)
 			throws IOException, NoSuchAlgorithmException {
 
 		List<String> wrong = new ArrayList<>();
-		HashMap<String, String> fromFile = FileOperations.getHm(FileOperations.readFile(file));
 		wrong = CksumCmp.cmpHashMaps(fromFile, fromDb);
 
 		if (!wrong.isEmpty()) {
