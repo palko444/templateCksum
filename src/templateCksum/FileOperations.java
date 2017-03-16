@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -27,19 +25,15 @@ public class FileOperations {
 
 	public static DataFromFile readFile(String file) throws IOException {
 
-		List<String> fileRed;
-		HashMap<String, String> polCksum = new HashMap<>();
 		try (Scanner sc = new Scanner(new File(file))) {
-			fileRed = new ArrayList<String>();
+			HashMap<String, String> polCksum = new HashMap<>();
+			String pg = sc.nextLine();
 			while (sc.hasNextLine()) {
-				fileRed.add(sc.nextLine());
-			}
-			for (int i = 1; i < fileRed.size(); ++i) {
-				String[] kv = fileRed.get(i).split(" ");
+				String[] kv = sc.nextLine().split(" ");
 				polCksum.put(kv[0], kv[1]);
 			}
+			return new DataFromFile(pg, polCksum);
 		}
-		return new DataFromFile(fileRed.get(0), polCksum);
 	}
 
 }

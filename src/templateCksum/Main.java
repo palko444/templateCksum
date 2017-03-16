@@ -14,25 +14,17 @@ public class Main {
 
 	public static void main(String[] args) throws IOException, NoSuchAlgorithmException, ArgumentParserException {
 
-		String pg;
 		Namespace ns = ArgParser.parse(args);
-		DataFromFile df = FileOperations.readFile(ns.getString("file"));
-
-		if (ns.getString("subcommand").equals("verify")) {
-			pg = df.pg;
-		} else {
-			pg = ns.getString("policyGroup");
-		}
-
-		HashMap<String, String> fromDb = createCksumFromDb(pg);
 		boolean ret = false;
 
 		switch (ns.getString("subcommand")) {
 		case "generate":
-			ret = generate(ns.getString("file"), pg, fromDb);
+			String pg = ns.getString("policyGroup");
+			ret = generate(ns.getString("file"), pg, createCksumFromDb(pg));
 			break;
 		case "verify":
-			ret = verify(df.polCksum, fromDb);
+			DataFromFile df = FileOperations.readFile(ns.getString("file"));
+			ret = verify(df.polCksum, createCksumFromDb(df.pg));
 			break;
 		default:
 		}
