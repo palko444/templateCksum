@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class FileOperations {
 
-	public static void writeFile(String pg, String file, HashMap<String, String> map) {
+	public static void writeFile(String file, String pg, HashMap<String, String> map) {
 
 		Charset charset = Charset.forName("UTF-8");
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file), charset)) {
@@ -36,5 +36,15 @@ public class FileOperations {
 		sc.close();
 		return fileRed;
 	}
-	
+
+	public static HashMap<String, String> getHm(List<String> list) {
+
+		HashMap<String, String> hm = new HashMap<>();
+		for (int i = 1; i < list.size(); ++i) {
+			String[] kv = list.get(i).split(" ");
+			hm.put(kv[0], kv[1]);
+		}
+		return hm;
+	}
+
 }

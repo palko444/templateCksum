@@ -1,25 +1,28 @@
 package templateCksum;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.*;
 
 public class ArgParser {
 
-	public static Namespace parse(String[] args) throws ArgumentParserException {
+	public static Namespace parse(String[] args) {
 		ArgumentParser parser = ArgumentParsers.newArgumentParser("pol")
 				.description("Check if templates were correctly uploaded");
-		parser.addArgument("-f", "--file").help("Generate cksum file from pg").type(String.class).required(true);
 
 		Subparsers sp = parser.addSubparsers().dest("subcommand");
 		Subparser spGenerate = sp.addParser("generate").help("generate cksum file");
-		Subparser spCompare = sp.addParser("compare").help("Compare pg vs cksum file");
+		Subparser spVerify = sp.addParser("verify").help("Verify cksum");
 
 		spGenerate.addArgument("-p", "--policyGroup").help("Pg to download").type(String.class).required(true);
+		spGenerate.addArgument("-f", "--file").help("Generate cksum file from pg.").type(String.class).required(true);
+		spVerify.addArgument("-f", "--file").help("File to generate from.").type(String.class).required(true);
 
-		parser.addArgument("-c", "--compare").help("Comapare pg from db accorting to file")
-				.action(Arguments.storeTrue()).setDefault(false);
-
-		return parser.parseArgs(args);
+		try {
+			return parser.parseArgs(args);
+		} catch (ArgumentParserException a) {
+			parser.printHelp();
+			System.exit(1);
+			return null;
+		}
 	}
 }

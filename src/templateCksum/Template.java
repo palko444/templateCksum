@@ -17,16 +17,15 @@ import com.dxc.command_executor.StreamGobbler.QueueFullException;
 
 public class Template {
 
-	String tempFolder;
+	static String tempFolder;
 
-	public void createTempFolder() throws IOException {
-		this.tempFolder = Files.createTempDirectory(Paths.get("/tmp"), "polDown").toString();
+	public static void createTempFolder() throws IOException {
+		tempFolder = Files.createTempDirectory(Paths.get("/tmp"), "polDown").toString();
 
 	}
 
-	public void downloadPolicies(String pg) throws QueueFullException, IOException {
-		CommandExecutor
-				.create("/opt/OV/bin/OpC/utils/opctempl", "-download", "pol_group=" + pg, "dir=" + this.tempFolder)
+	public static void downloadPolicies(String pg) throws QueueFullException, IOException {
+		CommandExecutor.create("/opt/OV/bin/OpC/utils/opctempl", "-download", "pol_group=" + pg, "dir=" + tempFolder)
 				.exec(Duration.standardSeconds(30));
 	}
 
