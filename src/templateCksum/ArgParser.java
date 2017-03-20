@@ -10,7 +10,7 @@ public class ArgParser {
 				.description("Check if templates were correctly uploaded");
 
 		Subparsers sp = parser.addSubparsers().dest("subcommand");
-		Subparser spGenerate = sp.addParser("generate").help("generate cksum file");
+		Subparser spGenerate = sp.addParser("generate").help("Generate cksum file");
 		Subparser spVerify = sp.addParser("verify").help("Verify cksum");
 
 		spGenerate.addArgument("-p", "--policyGroup").help("Pg to download").type(String.class).required(true);

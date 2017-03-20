@@ -3,7 +3,6 @@ package templateCksum;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,9 +30,10 @@ public class Main {
 
 		if (ret) {
 			Template.deleteTempFolder(Template.tempFolder);
-			System.out.println("all OK");
+			System.out.println("Final status: OK");
 		} else {
-			System.out.println("FAIL");
+			System.out.println("\nFinal status: FAIL");
+			System.out.printf("All donwloaded policies are located here: %s\n", Template.tempFolder);
 		}
 	}
 
@@ -47,7 +47,7 @@ public class Main {
 	public static HashMap<String, String> createCksumFromDb(String pg) throws IOException, NoSuchAlgorithmException {
 		HashMap<String, String> fromDb = new HashMap<>();
 		Template.createTempFolder();
-		System.out.println(Template.tempFolder);
+		// System.out.println(Template.tempFolder);
 		Template.downloadPolicies(pg);
 		File[] dataFiles = Template.getDataFiles(Template.tempFolder);
 		fromDb = Template.processFiles(dataFiles);
@@ -57,17 +57,36 @@ public class Main {
 	public static boolean verify(HashMap<String, String> fromFile, HashMap<String, String> fromDb)
 			throws IOException, NoSuchAlgorithmException {
 
-		List<String> wrong = new ArrayList<>();
-		wrong = CksumCmp.cmpHashMaps(fromFile, fromDb);
+		boolean isOk = true;
+		final CmpResults results = CksumCmp.cmpHashMaps(fromFile, fromDb);
+		final List<String> wrongCksum = results.wrongCksum;
+		final List<String> missingFile = results.missingFile;
+		final List<String> missingDb = results.missingDb;
 
-		if (!wrong.isEmpty()) {
-			System.out.println("These files have different cksum");
-			for (String dataFile : wrong) {
-				System.out.println(dataFile);
+		if (!missingFile.isEmpty()) {
+			System.out.println("\n## These templates are additional on current system.");
+			for (String record : missingFile) {
+				System.out.println(record);
 			}
-			return false;
+			isOk = false;
 		}
-		return true;
+
+		if (!missingDb.isEmpty()) {
+			System.out.println("\n## These templates are missing on current system.");
+			for (String record : missingDb) {
+				System.out.println(record);
+			}
+			isOk = false;
+		}
+
+		if (!wrongCksum.isEmpty()) {
+			System.out.println("\n## These templates have different cksum.");
+			for (String record : wrongCksum) {
+				System.out.println(record);
+			}
+			isOk = false;
+		}
+		return isOk;
 	}
 
 }
