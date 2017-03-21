@@ -15,25 +15,26 @@ public class Main {
 
 		Namespace ns = ArgParser.parse(args);
 		boolean ret = false;
+		final String tempFolder = Template.createTempFolder();
 
 		switch (ns.getString("subcommand")) {
 		case "generate":
 			String pg = ns.getString("policyGroup");
-			ret = generate(ns.getString("file"), pg, createCksumFromDb(pg));
+			ret = generate(ns.getString("file"), pg, createCksumFromDb(pg, tempFolder));
 			break;
 		case "verify":
 			DataFromFile df = FileOperations.readFile(ns.getString("file"));
-			ret = verify(df.polCksum, createCksumFromDb(df.pg));
+			ret = verify(df.polCksum, createCksumFromDb(df.pg, tempFolder));
 			break;
 		default:
 		}
 
 		if (ret) {
-			Template.deleteTempFolder(Template.tempFolder);
+			Template.deleteTempFolder(tempFolder);
 			System.out.println("Final status: OK");
 		} else {
 			System.out.println("\nFinal status: FAIL");
-			System.out.printf("All donwloaded policies are located here: %s\n", Template.tempFolder);
+			System.out.printf("All donwloaded policies are located here: %s\n", tempFolder);
 		}
 	}
 
@@ -44,12 +45,13 @@ public class Main {
 		return true;
 	}
 
-	public static HashMap<String, String> createCksumFromDb(String pg) throws IOException, NoSuchAlgorithmException {
+	public static HashMap<String, String> createCksumFromDb(String pg, String tempFolder)
+			throws IOException, NoSuchAlgorithmException {
 		HashMap<String, String> fromDb = new HashMap<>();
 		Template.createTempFolder();
 		// System.out.println(Template.tempFolder);
-		Template.downloadPolicies(pg);
-		File[] dataFiles = Template.getDataFiles(Template.tempFolder);
+		Template.downloadPolicies(pg, tempFolder);
+		final File[] dataFiles = Template.getDataFiles(tempFolder);
 		fromDb = Template.processFiles(dataFiles);
 		return fromDb;
 	}

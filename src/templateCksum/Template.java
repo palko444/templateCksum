@@ -10,21 +10,25 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.joda.time.Duration;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import com.dxc.command_executor.CommandExecutor;
 import com.dxc.command_executor.StreamGobbler.QueueFullException;
 
 public class Template {
 
-	static String tempFolder;
-
-	public static void createTempFolder() throws IOException {
-		tempFolder = Files.createTempDirectory(Paths.get("/tmp"), "polDown").toString();
+	public static String createTempFolder() throws IOException {
+		return Files.createTempDirectory(Paths.get("/tmp"), "polDown").toString();
 
 	}
 
-	public static void downloadPolicies(String pg) throws QueueFullException, IOException {
+	public static void downloadPolicies(String pg, String tempFolder) throws QueueFullException, IOException {
 		CommandExecutor.create("/opt/OV/bin/OpC/utils/opctempl", "-download", "pol_group=" + pg, "dir=" + tempFolder)
 				.exec(Duration.standardSeconds(30));
 	}
@@ -65,6 +69,21 @@ public class Template {
 			cksumFile.put(file.getName(), calculateSha256(file));
 		}
 		return cksumFile;
+	}
+
+	public static HashMap<String, String> readXml(File[] dataFiles) throws ParserConfigurationException, SAXException, IOException {
+
+		for (File file : dataFiles) {
+			File xmlFile = new File(file.toString().replace("_data", "_header.xml"));
+
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(xmlFile);
+			doc.getDocumentElement().normalize();
+
+		}
+
+		return null;
 	}
 
 	public static String calculateSha256(File file) throws IOException, NoSuchAlgorithmException {
