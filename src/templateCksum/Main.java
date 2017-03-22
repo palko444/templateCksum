@@ -38,21 +38,25 @@ public class Main {
 		}
 	}
 
-	public static boolean generate(String file, String pg, HashMap<String, String> fromDb)
+	public static boolean generate(String file, String pg, HashMap<String, PolicyAttributes> fromDb)
 			throws NoSuchAlgorithmException, IOException {
 
 		FileOperations.writeFile(file, pg, fromDb);
 		return true;
 	}
 
-	public static HashMap<String, String> createCksumFromDb(String pg, String tempFolder)
+	public static HashMap<String, PolicyAttributes> createCksumFromDb(String pg, String tempFolder)
 			throws IOException, NoSuchAlgorithmException {
-		HashMap<String, String> fromDb = new HashMap<>();
+		HashMap<String, PolicyAttributes> fromDb = new HashMap<>();
 		Template.createTempFolder();
 		// System.out.println(Template.tempFolder);
 		Template.downloadPolicies(pg, tempFolder);
 		final File[] dataFiles = Template.getDataFiles(tempFolder);
-		fromDb = Template.processFiles(dataFiles);
+		try {
+			fromDb = Template.processFiles(dataFiles);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 		return fromDb;
 	}
 

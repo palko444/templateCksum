@@ -16,6 +16,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.joda.time.Duration;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.dxc.command_executor.CommandExecutor;
@@ -57,33 +60,43 @@ public class Template {
 
 			@Override
 			public boolean accept(File dir, String name) {
-				// TODO Auto-generated method stub
 				return name.endsWith("_data");
 			}
 		});
 	}
 
-	public static HashMap<String, String> processFiles(File[] dataFiles) throws NoSuchAlgorithmException, IOException {
-		HashMap<String, String> cksumFile = new HashMap<String, String>();
+	public static HashMap<String, PolicyAttributes> processFiles(File[] dataFiles)
+			throws NoSuchAlgorithmException, IOException, ParserConfigurationException, SAXException {
+		HashMap<String, PolicyAttributes> cksumFile = new HashMap<>();
 		for (File file : dataFiles) {
-			cksumFile.put(file.getName(), calculateSha256(file));
+			String cksum = calculateSha256(file);
+			File xmlFile = new File(file.toString().replace("_data", "_header.xml"));
+			String[] cica = readXml(xmlFile);
+			String name = cica[0];
+			String version = cica[1];
+			String type = cica[2];
+			cksumFile.put(file.getName(), new PolicyAttributes(name, version, type, cksum));
 		}
 		return cksumFile;
 	}
 
-	public static HashMap<String, String> readXml(File[] dataFiles) throws ParserConfigurationException, SAXException, IOException {
+	public static String[] readXml(File xmlFile) throws ParserConfigurationException, SAXException, IOException {
 
-		for (File file : dataFiles) {
-			File xmlFile = new File(file.toString().replace("_data", "_header.xml"));
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		Document doc = dBuilder.parse(xmlFile);
+		doc.getDocumentElement().normalize();
+		Element header = (Element) doc.getElementsByTagName("header").item(0);
+		Element ePolicy = (Element) header.getElementsByTagName("policy").item(0);
+		String name = ePolicy.getElementsByTagName("name").item(0).getTextContent();
+		String version = ePolicy.getElementsByTagName("version").item(0).getTextContent();
 
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(xmlFile);
-			doc.getDocumentElement().normalize();
+		Element ePolicyType = (Element) header.getElementsByTagName("policytype").item(0);
+		String type = ePolicyType.getElementsByTagName("name").item(0).getTextContent();
 
-		}
+		System.out.println(name + "|" + version + "|" + type);
+		return new String[] { name, version, type };
 
-		return null;
 	}
 
 	public static String calculateSha256(File file) throws IOException, NoSuchAlgorithmException {
