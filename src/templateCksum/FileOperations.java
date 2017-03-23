@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class FileOperations {
 
-	public static void writeFile(String file, String pg, HashMap<String, PolicyAttributes> map) throws IOException {
+	public static void writeFile(String file, String pg, Map<String, PolicyAttributes> map) throws IOException {
 
 		Charset charset = Charset.forName("UTF-8");
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file), charset)) {
@@ -29,9 +28,10 @@ public class FileOperations {
 
 	public static DataFromFile readFile(String file) throws IOException {
 
+		final DataFromFile df;
 		try (Scanner sc = new Scanner(new File(file))) {
 			String pg = sc.nextLine();
-			DataFromFile df = new DataFromFile(pg);
+			df = new DataFromFile(pg);
 			while (sc.hasNextLine()) {
 				String[] kv = sc.nextLine().split(" ", 5);
 				String fileName = kv[0];
@@ -42,8 +42,8 @@ public class FileOperations {
 				PolicyAttributes attrs = new PolicyAttributes(name, version, type, cksum);
 				df.addPolicyAttrs(fileName, attrs);
 			}
-			return df;
 		}
+		return df;
 	}
 
 }

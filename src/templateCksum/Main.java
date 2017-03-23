@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -24,7 +24,7 @@ public class Main {
 			break;
 		case "verify":
 			DataFromFile df = FileOperations.readFile(ns.getString("file"));
-			ret = verify(df.polCksum, createCksumFromDb(df.pg, tempFolder));
+			ret = verify(df.polAttrs, createCksumFromDb(df.pg, tempFolder));
 			break;
 		default:
 		}
@@ -38,14 +38,14 @@ public class Main {
 		}
 	}
 
-	public static boolean generate(String file, String pg, HashMap<String, PolicyAttributes> fromDb)
+	public static boolean generate(String file, String pg, Map<String, PolicyAttributes> fromDb)
 			throws NoSuchAlgorithmException, IOException {
 
 		FileOperations.writeFile(file, pg, fromDb);
 		return true;
 	}
 
-	public static HashMap<String, PolicyAttributes> createCksumFromDb(String pg, String tempFolder)
+	public static Map<String, PolicyAttributes> createCksumFromDb(String pg, String tempFolder)
 			throws IOException, NoSuchAlgorithmException {
 		HashMap<String, PolicyAttributes> fromDb = new HashMap<>();
 		Template.createTempFolder();
@@ -60,39 +60,37 @@ public class Main {
 		return fromDb;
 	}
 
-	public static boolean verify(HashMap<String, String> fromFile, HashMap<String, String> fromDb)
+	public static boolean verify(Map<String, PolicyAttributes> fromFile, Map<String, PolicyAttributes> fromDb)
 			throws IOException, NoSuchAlgorithmException {
 
 		boolean isOk = true;
 		final CmpResults results = CksumCmp.cmpHashMaps(fromFile, fromDb);
-		final List<String> wrongCksum = results.wrongCksum;
-		final List<String> missingFile = results.missingFile;
-		final List<String> missingDb = results.missingDb;
+		final Map<String, PolicyAttributes> wrongCksum = results.wrongCksum;
+		final Map<String, PolicyAttributes> missingFile = results.missingFile;
+		final Map<String, PolicyAttributes> missingDb = results.missingDb;
 
-		if (!missingFile.isEmpty()) {
-			System.out.println("\n## These templates are additional on current system.");
-			for (String record : missingFile) {
-				System.out.println(record);
-			}
-			isOk = false;
-		}
-
-		if (!missingDb.isEmpty()) {
-			System.out.println("\n## These templates are missing on current system.");
-			for (String record : missingDb) {
-				System.out.println(record);
-			}
-			isOk = false;
-		}
-
-		if (!wrongCksum.isEmpty()) {
-			System.out.println("\n## These templates have different cksum.");
-			for (String record : wrongCksum) {
-				System.out.println(record);
-			}
-			isOk = false;
-		}
+		isOk = printResults("These templates are additional on current system.", missingFile);
+		isOk = printResults("These templates are missing on current system.", missingDb);
+		isOk = printResults("These templates have different cksum.", wrongCksum);
 		return isOk;
+	}
+
+	public static boolean printResults(String message, Map<String, PolicyAttributes> issue) {
+
+		if (issue.isEmpty()) {
+			return true;
+		} else {
+			System.out.println("\n## " + message);
+			for (Map.Entry<String, PolicyAttributes> entry : issue.entrySet()) {
+				String dataFile = entry.getKey();
+				String cksum = entry.getValue().cksum;
+				String name = entry.getValue().name;
+				String version = entry.getValue().version;
+				String type = entry.getValue().type;
+				System.out.printf("%s %s %s %s %s \n", dataFile, cksum, version, type, name);
+			}
+			return false;
+		}
 	}
 
 }

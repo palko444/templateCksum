@@ -1,13 +1,14 @@
 package templateCksum;
 
-import java.util.List;
+import java.util.Map;
 
 public class CmpResults {
-	final List<String> missingFile;
-	final List<String> missingDb;
-	final List<String> wrongCksum;
+	final Map<String, PolicyAttributes> missingFile;
+	final Map<String, PolicyAttributes> missingDb;
+	final Map<String, PolicyAttributes> wrongCksum;
 
-	public CmpResults(List<String> missingFile, List<String> missingDb, List<String> wrongCksum) {
+	public CmpResults(Map<String, PolicyAttributes> missingFile, Map<String, PolicyAttributes> missingDb,
+			Map<String, PolicyAttributes> wrongCksum) {
 		this.missingDb = missingDb;
 		this.missingFile = missingFile;
 		this.wrongCksum = wrongCksum;

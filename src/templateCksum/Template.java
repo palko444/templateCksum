@@ -17,8 +17,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.joda.time.Duration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.dxc.command_executor.CommandExecutor;
@@ -94,7 +92,6 @@ public class Template {
 		Element ePolicyType = (Element) header.getElementsByTagName("policytype").item(0);
 		String type = ePolicyType.getElementsByTagName("name").item(0).getTextContent();
 
-		System.out.println(name + "|" + version + "|" + type);
 		return new String[] { name, version, type };
 
 	}
