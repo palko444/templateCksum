@@ -48,8 +48,6 @@ public class Main {
 	public static Map<String, PolicyAttributes> createCksumFromDb(String pg, String tempFolder)
 			throws IOException, NoSuchAlgorithmException {
 		HashMap<String, PolicyAttributes> fromDb = new HashMap<>();
-		Template.createTempFolder();
-		// System.out.println(Template.tempFolder);
 		Template.downloadPolicies(pg, tempFolder);
 		final File[] dataFiles = Template.getDataFiles(tempFolder);
 		try {

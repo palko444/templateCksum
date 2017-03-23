@@ -21,6 +21,7 @@ public class CksumCmp {
 							wrongCksum.put(entry.getKey(), entry.getValue());
 						}
 					}
+					break;
 				}
 			}
 		}
