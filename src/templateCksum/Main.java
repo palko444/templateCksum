@@ -30,7 +30,9 @@ public class Main {
 		}
 
 		if (ret) {
-			Template.deleteTempFolder(tempFolder);
+//			if (!ns.getBoolean("k")) {
+				Template.deleteTempFolder(tempFolder);
+//			}
 			System.out.println("Final status: OK");
 		} else {
 			System.out.println("\nFinal status: FAIL");
@@ -38,16 +40,16 @@ public class Main {
 		}
 	}
 
-	public static boolean generate(String file, String pg, Map<String, PolicyAttributes> fromDb)
+	public static boolean generate(String file, String pg, Map<String, String> fromDb)
 			throws NoSuchAlgorithmException, IOException {
 
 		FileOperations.writeFile(file, pg, fromDb);
 		return true;
 	}
 
-	public static Map<String, PolicyAttributes> createCksumFromDb(String pg, String tempFolder)
+	public static Map<String, String> createCksumFromDb(String pg, String tempFolder)
 			throws IOException, NoSuchAlgorithmException {
-		HashMap<String, PolicyAttributes> fromDb = new HashMap<>();
+		HashMap<String, String> fromDb = new HashMap<>();
 		Template.downloadPolicies(pg, tempFolder);
 		final File[] dataFiles = Template.getDataFiles(tempFolder);
 		try {
@@ -58,34 +60,30 @@ public class Main {
 		return fromDb;
 	}
 
-	public static boolean verify(Map<String, PolicyAttributes> fromFile, Map<String, PolicyAttributes> fromDb)
+	public static boolean verify(Map<String, String> fromFile, Map<String, String> fromDb)
 			throws IOException, NoSuchAlgorithmException {
 
-		boolean isOk = true;
 		final CmpResults results = CksumCmp.cmpHashMaps(fromFile, fromDb);
-		final Map<String, PolicyAttributes> wrongCksum = results.wrongCksum;
-		final Map<String, PolicyAttributes> missingFile = results.missingFile;
-		final Map<String, PolicyAttributes> missingDb = results.missingDb;
+		final Map<String, String> wrongCksum = results.wrongCksum;
+		final Map<String, String> missingFile = results.missingFile;
+		final Map<String, String> missingDb = results.missingDb;
 
-		isOk = printResults("These templates are additional on current system.", missingFile);
-		isOk = printResults("These templates are missing on current system.", missingDb);
-		isOk = printResults("These templates have different cksum.", wrongCksum);
-		return isOk;
+		boolean noMissingTemplates = printResults("These templates are additional on current system.", missingFile);
+		boolean noAditionalTemplates = printResults("These templates are missing on current system.", missingDb);
+		boolean noWrongCksums = printResults("These templates have different cksum.", wrongCksum);
+		return noMissingTemplates && noAditionalTemplates && noWrongCksums;
 	}
 
-	public static boolean printResults(String message, Map<String, PolicyAttributes> issue) {
+	public static boolean printResults(String message, Map<String, String> issue) {
 
 		if (issue.isEmpty()) {
 			return true;
 		} else {
 			System.out.println("\n## " + message);
-			for (Map.Entry<String, PolicyAttributes> entry : issue.entrySet()) {
-				String dataFile = entry.getKey();
-				String cksum = entry.getValue().cksum;
-				String name = entry.getValue().name;
-				String version = entry.getValue().version;
-				String type = entry.getValue().type;
-				System.out.printf("%s %s %s %s %s \n", dataFile, cksum, version, type, name);
+			for (Map.Entry<String, String> entry : issue.entrySet()) {
+				String cksum = entry.getKey();
+				String polIdentifier = entry.getValue();
+				System.out.printf("%s %s \n", cksum, polIdentifier);
 			}
 			return false;
 		}

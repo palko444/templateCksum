@@ -1,13 +1,17 @@
 package templateCksum;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.*;
 
 public class ArgParser {
 
 	public static Namespace parse(String[] args) {
 		ArgumentParser parser = ArgumentParsers.newArgumentParser("pol")
-				.description("Check if templates were correctly uploaded");
+				.description("Check if templates were correctly uploaded").version("00.01");
+		parser.addArgument("-V", "--version").help("print version of OMC").action(Arguments.version());
+		parser.addArgument("-k", "--keep").help("Keep temporary files.").action(Arguments.storeTrue())
+				.setDefault(false);
 
 		Subparsers sp = parser.addSubparsers().dest("subcommand");
 		Subparser spGenerate = sp.addParser("generate").help("Generate cksum file");

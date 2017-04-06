@@ -5,19 +5,19 @@ import java.util.Map;
 
 public class CksumCmp {
 
-	public static CmpResults cmpHashMaps(Map<String, PolicyAttributes> fromFile, Map<String, PolicyAttributes> fromDb) {
+	public static CmpResults cmpHashMaps(Map<String, String> fromFile, Map<String, String> fromDb) {
 
-		final Map<String, PolicyAttributes> wrongCksum = new HashMap<>();
-		final Map<String, PolicyAttributes> missingFile = new HashMap<>();
-		final Map<String, PolicyAttributes> missingDb = new HashMap<>();
+		final Map<String, String> wrongCksum = new HashMap<>();
+		final Map<String, String> missingFile = new HashMap<>();
+		final Map<String, String> missingDb = new HashMap<>();
 
-		for (Map.Entry<String, PolicyAttributes> entry : fromFile.entrySet()) {
-			if (!fromDb.containsKey(entry.getKey())) {
+		for (Map.Entry<String, String> entry : fromFile.entrySet()) {
+			if (!fromDb.containsValue(entry.getValue())) {
 				missingDb.put(entry.getKey(), entry.getValue());
 			} else {
-				for (Map.Entry<String, PolicyAttributes> entry1 : fromDb.entrySet()) {
-					if (entry.getKey().equals(entry1.getKey())) {
-						if (!entry.getValue().cksum.equals(entry1.getValue().cksum)) {
+				for (Map.Entry<String, String> entry1 : fromDb.entrySet()) {
+					if (entry.getValue().equals(entry1.getValue())) {
+						if (!entry.getKey().equals(entry1.getKey())) {
 							wrongCksum.put(entry.getKey(), entry.getValue());
 						}
 					}
@@ -28,8 +28,8 @@ public class CksumCmp {
 
 		for (
 
-		Map.Entry<String, PolicyAttributes> entry : fromDb.entrySet()) {
-			if (!fromFile.containsKey(entry.getKey())) {
+		Map.Entry<String, String> entry : fromDb.entrySet()) {
+			if (!fromFile.containsValue(entry.getValue())) {
 				missingFile.put(entry.getKey(), entry.getValue());
 			}
 		}

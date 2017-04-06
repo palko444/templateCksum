@@ -63,9 +63,9 @@ public class Template {
 		});
 	}
 
-	public static HashMap<String, PolicyAttributes> processFiles(File[] dataFiles)
+	public static HashMap<String, String> processFiles(File[] dataFiles)
 			throws NoSuchAlgorithmException, IOException, ParserConfigurationException, SAXException {
-		HashMap<String, PolicyAttributes> cksumFile = new HashMap<>();
+		HashMap<String, String> cksumFile = new HashMap<>();
 		for (File file : dataFiles) {
 			String cksum = calculateSha256(file);
 			File xmlFile = new File(file.toString().replace("_data", "_header.xml"));
@@ -73,7 +73,7 @@ public class Template {
 			String name = cica[0];
 			String version = cica[1];
 			String type = cica[2];
-			cksumFile.put(file.getName(), new PolicyAttributes(name, version, type, cksum));
+			cksumFile.put(cksum, version + "_" + type + "_" + name);
 		}
 		return cksumFile;
 	}

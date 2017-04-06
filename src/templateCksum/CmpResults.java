@@ -3,12 +3,11 @@ package templateCksum;
 import java.util.Map;
 
 public class CmpResults {
-	final Map<String, PolicyAttributes> missingFile;
-	final Map<String, PolicyAttributes> missingDb;
-	final Map<String, PolicyAttributes> wrongCksum;
+	final Map<String, String> missingFile;
+	final Map<String, String> missingDb;
+	final Map<String, String> wrongCksum;
 
-	public CmpResults(Map<String, PolicyAttributes> missingFile, Map<String, PolicyAttributes> missingDb,
-			Map<String, PolicyAttributes> wrongCksum) {
+	public CmpResults(Map<String, String> missingFile, Map<String, String> missingDb, Map<String, String> wrongCksum) {
 		this.missingDb = missingDb;
 		this.missingFile = missingFile;
 		this.wrongCksum = wrongCksum;
