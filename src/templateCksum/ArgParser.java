@@ -8,7 +8,7 @@ public class ArgParser {
 
 	public static Namespace parse(String[] args) {
 		ArgumentParser parser = ArgumentParsers.newArgumentParser("pol")
-				.description("Check if templates were correctly uploaded").version("00.01");
+				.description("Check if templates were correctly uploaded").version("00.02");
 		parser.addArgument("-V", "--version").help("print version of OMC").action(Arguments.version());
 		parser.addArgument("-k", "--keep").help("Keep temporary files.").action(Arguments.storeTrue())
 				.setDefault(false);
@@ -23,8 +23,9 @@ public class ArgParser {
 
 		try {
 			return parser.parseArgs(args);
-		} catch (ArgumentParserException a) {
-			parser.printHelp();
+		} catch (ArgumentParserException e) {
+			e.getParser().printHelp();
+			// parser.printHelp();
 			System.exit(1);
 			return null;
 		}
